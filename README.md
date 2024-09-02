@@ -1,3 +1,11 @@
-# Reinforcement Learning
+# Frozen Lake 
 
-#### This project includes tubular and approximative methods
+## About the project
+
+## Features
+
+## Installation
+
+## Technologies used
+
+## License 

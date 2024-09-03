@@ -150,5 +150,7 @@ Code completed by Alexia Cismaru.
 
 ## Sources
 TechTarget: https://www.techtarget.com/searchenterpriseai/definition/Q-learning
+
 GeeksForGeeks: https://www.geeksforgeeks.org/deep-q-learning/, https://www.geeksforgeeks.org/monte-carlo-policy-evaluation/
+
 GitHub: https://intellabs.github.io/coach/components/agents/value_optimization/n_step.html

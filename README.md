@@ -14,116 +14,174 @@ The cartpole problem is an inverted pendulum problem where a stick is balanced u
 
 The purpose of this project is to implement reinforcement learning using Q-learning, Deep Q-learning, N-step Q-learning, and Monte Carlo learning algorithms.
 
-### Q-Learning
+### Tabular learning
+Tubular learning is a subfield of AI and semi-supervised learning. It learns how to take actions in an environment to minimize the optimal cumulative reward. It uses an agent and environment to interact with each other via episodes. The agent has no control over the environment and is in state St, meaning it can be in multiple states. The agent has a reward. It needs to choose an action that is taken as an input and it moves the agent according to the action.
 
-Q-learning is a machine learning algorithm that allows the model to learn and improve by trial and error. Good actions are rewarded or reinforced, while bad actions are discouraged and penalized.
+- Every time the agent takes a step a percept is created.
+- All the things an agent does are collected in an episode
+- An episode is a collection of percepts (what it did, what it will do next, rewards, etc.)
+- The episode ends when the agent gets to an end. The environment will be reset and the agent will start learning again.
 
-Q-learning takes an off-policy approach to reinforcement learning. A Q-learning approach aims to determine the optimal action based on its current state. The Q-learning approach can accomplish this by either developing its own set of rules or deviating from the prescribed policy. A defined policy is unnecessary because Q-learning may deviate from the given policy.
+### Markov Decision Process
+The Markov decision process is a math model of the environment where the agent has to think of the environment mathematically to learn how to behave. It represents a collection of states, every state having a number of actions.
 
-The off-policy approach in Q-learning is achieved using Q-values -- also known as action values. The Q-values are the expected future values for action and are stored in the Q-table.
+A table is created that stores the state and the action that has a reward (R is a reward for r(s, a)). s is the state and a is the action used.
+A transition model is a probability distribution, meaning that there are chances that you will end up in a state, given the current state and an action (all probabilities for all combinations)
+  ```
+  P(s' | s, a)
+  ```
+- policy is a collection of actions (what actions to take in a certain state)
+- non-deterministic = if you want to go up there's an 80% chance that you will go up and 10% chance that you will go right and a 10% chance that you will go left
 
-#### How does Q-learning work?
-Q-learning models operate in an iterative process that involves multiple components working together to help train a model. The iterative process involves the agent learning by exploring the environment and updating the model as the exploration continues. The multiple components of Q-learning include the following:
-
-- Agents. The agent is the entity that acts and operates within an environment.
-- States. The state is a variable that identifies the current position in the environment of an agent.
-- Actions. The action is the agent's operation when it is in a specific state.
-- Rewards. A foundational concept within reinforcement learning is the concept of providing either a positive or a negative response to the agent's actions.
-- Episodes. An episode is when an agent can no longer take a new action and ends up terminating.
-- Q-values. The Q-value is the metric used to measure an action at a particular state.
-
-Q-learning models work through trial-and-error experiences to learn the optimal behavior for a task. The Q-learning process involves modeling optimal behavior by learning an optimal action-value function or q-function. This function represents the optimal long-term value of action a in state s and subsequently follows optimal behavior in every subsequent state.
-
-Bellman's equation
+*The random policy (π)* means that the agent has an uniform distribution of chances for each direction (25%), and there will be a reward only at the end.
 ```
-Q(s,a) = Q(s,a) + α * (r + γ * max(Q(s',a')) - Q(s,a))
+π(a|s)  
 ```
 
-The equation breaks down as follows:
+*The optimal policy (π*)* means that the agent has to learn the most optimal action by using reinforcement learning. This is implemented by walking around and keeping track of some values using algorithms. 
+```
+π*(a|s)  
+```
+For every episode/step(s) the table is going to be updated.
 
-- Q(s, a) represents the expected reward for taking action a in state s.
-- The actual reward received for that action is referenced by r while s' refers to the next state.
-- The learning rate is α and γ is the discount factor.
-- The highest expected reward for all possible actions a' in state s' is represented by max(Q(s', a')).
+#### Agent
+The inputs *St*, *Rt*, and the output *At* are random variables. At every timestamp, a new random variable is decided by the distribution.
+
+An agent can select an action according to a π() and appears in *A*, and the rewards are determined by faith.
+
+The agent has no knowledge of the environment and needs to learn the underlying mechanics of the environment by experimenting. It refines the π to π* through interacting with the env.
+
+A percept is what the agent perceives and is one SARS'.
+
+A percept (Ot) contains:
+1. current state
+2. chosen action
+3. reward
+4. next state
+5. done
+
+An episode has a series of percepts. For each percept a return *Gt* is calculated. This *Gt* represents the discounted sum of rewards from *step t* in Episode starting from *time t*.
+
+```
+return = next reward + γ + next reward
+```
+
+The *v-value* specifies what the total reward value should be for a particular state. The higher the better.
+
+### Agent Algorithm
+
+The agent needs to know how to learn (what learning strategy it should choose). It also keeps track of a counter and as long as it's not done creating episodes it will try a new Episode object. The episode stores the percept and does the cumulative returns (container for the percepts).
+
+It asks the container the location of the agent by using an input (state) and the environment tells the agent where it is. Then, it checks if the episode is done and asks the strategy what the agent should do. The agent receives the action and gives it to an input.
+
+The strategy learns from an episode or percept and it updates the state.
+
+### Tabular methods
+
+The optimal policy can be done using tables.
+- if they need neural networks → approximative methods
+- Q-Learning, N-Step Q-Learning, and Monte Carlo are temporal difference learning. They work for smaller problems with a limited number of states.
+
+The policy iteration is what makes the agent learn. The agent keeps track of the π policy.
+
+The q-table is the v-table with more precision. The v-table updates the policy. 
+
+- The agent starts with a random set of tables and every state has uniform distribution.
+
+#### Policy Evaluation
+
+Policy evaluation is the mathematical way to drive the π into a V (state value table). The agent has a policy that it keeps track of. We derive the π using Bellmans's equation. π loops over the state and computes its V value from the policy table.
+```
+V(s)=maxa(R(s,a)+ γV(s’))
+```
+
+γ is the discount factor. This represents how much you discount a future reward. It takes into account that future rewards are not as big as they are right now.
+
+- state-action values = Qπ(s, a)
   
-#### What is a Q-table?
-The Q-table includes columns and rows with lists of rewards for the best actions of each state in a specific environment. A Q-table helps an agent understand what actions are likely to lead to positive outcomes in different situations.
+  ![image](https://github.com/user-attachments/assets/a7b28e29-23d1-4944-80d6-5185f79ede30)
+  
+- Q-values are more specific (computes a value for all the states you can be in)
+- V-values are associated with the entire square (how valuable it is)
+- all squares have their Q-table (16x4 for higher resolution)
 
-The table rows represent different situations the agent might encounter, and the columns represent the actions it can take. As the agent interacts with the environment and receives feedback in the form of rewards or penalties, the values in the Q-table are updated to reflect what the model has learned.
+The v-value of a state is the average discounted sum of rewards from along the episode. It determines the quality of the path.
 
-The purpose of reinforcement learning is to gradually improve performance through the Q-table to help choose actions. With more feedback, the Q-table becomes more accurate so the agent can make better decisions and achieve optimal results.
+For all the states S calculate the utility value using the value function Vπ(s).
 
-The Q-table is directly related to the concept of the Q-function. The Q-function is a mathematical equation that looks at the current state of the environment and the action under consideration as inputs. The Q-function then generates outputs along with expected future rewards for that action in the specific state. The Q-table allows the agent to look up the expected future reward for any given state-action pair to move toward an optimized state.
+### Approximate methods
 
-#### What is the Q-learning algorithm process?
-The Q-learning algorithm process is an interactive method where the agent learns by exploring the environment and updating the Q-table based on the rewards received.
+They handle problems with more states than tabular learning. It uses function approximators (neural networks), and is suitable for continuous spaces.
 
-The steps involved in the Q-learning algorithm process include the following:
-- Q-table initialization. The first step is to create the Q-table as a place to track each action in each state and the associated progress.
-- Observation. The agent needs to observe the current state of the environment.
-- Action. The agent chooses to act in the environment. Upon completion of the action, the model observes if the action benefits the environment.
-- Update. After the action has been taken, it's time to update the Q-table with the results.
-- Repeat. Repeat steps 2-4 until the model reaches a termination state for a desired objective.
+### Cartpole Environment
 
-### Deep Q-Learning
+- has a continuous state space
+- two discrete states(right or left)
+- all observations are assigned a uniformly random value
+- the episode ends when:
+  - pole angle >= +12 degrees
+  - cart position > +-2.4 degrees (reaches the end of the display)
+  - episode length > 500
+- reward for every timestamp
+- solved when the pole can be held upright
 
-Q-Learning is required as a pre-requisite as it is a process of Q-Learning creates an exact matrix for the working agent which it can “refer to” to maximize its reward in the long run. Although this approach is not wrong in itself, this is only practical for very small environments and quickly loses it’s feasibility when the number of states and actions in the environment increases. The solution for the above problem comes from the realization that the values in the matrix only have relative importance ie the values only have importance concerning the other values. Thus, this thinking leads us to Deep Q-Learning which uses a deep neural network to approximate the values. This approximation of values does not hurt as long as the relative importance is preserved. The basic working step for Deep Q-Learning is that the initial state is fed into the neural network and it returns the Q-value of all possible actions as an output. The difference between Q-Learning and Deep Q-Learning can be illustrated as follows:
+There is a reward for every timestamp, and it's solved when the pole can be held upright without violating one of the termination conditions for at least 195 steps.
 
-Deep Q-Learning is a type of reinforcement learning algorithm that uses a deep neural network to approximate the Q-function, which is used to determine the optimal action to take in a given state. The Q-function represents the expected cumulative reward of taking a certain action in a certain state and following a certain policy. In Q-Learning, the Q-function is updated iteratively as the agent interacts with the environment. Deep Q-Learning is used in various applications such as game playing, robotics, and autonomous vehicles.
+### Policy Iteration
 
-Deep Q-Learning is a variant of Q-Learning that uses a deep neural network to represent the Q-function, rather than a simple table of values. This allows the algorithm to handle environments with a large number of states and actions, as well as to learn from high-dimensional inputs such as images or sensor data.
+For more complex problems with many states, use a policy function that can generalize over stats when determining Q or V values. Neural networks are trained with more examples by generalizing unseen states.
 
-One of the key challenges in implementing Deep Q-Learning is that the Q-function is typically non-linear and can have many local minima. This can make it difficult for the neural network to converge to the correct Q-function. To address this, several techniques have been proposed, such as experience replay and target networks.
+π = neural network
+- to make the q-value equation optimal take the maximum q-value
+- use an expectation *E* to derive Q*(s, a)
+- there are infinite states possible
 
-Experience replay is a technique where the agent stores a subset of its experiences (state, action, reward, next state) in a memory buffer and samples from this buffer to update the Q-function. This helps to decorrelate the data and make the learning process more stable. Target networks, on the other hand, are used to stabilize the Q-function updates. In this technique, a separate network is used to compute the target Q-values, which are then used to update the Q-function network.
+The q-network is a function that you train. It minimizes the loss *L* using gradient descent. It steers the NN in the right direction. The equation can be used to create the training set for the NN.
 
-### N-Step Q-Learning
+### Policy 
 
-The N-step Q learning algorithm works in a similar manner to DQN except for the following changes:
+Neural Networks are functions that generalize well-overseen examples. They are trained using seen examples and they can predict unseen ones.
 
-No replay buffer is used. Instead of sampling random batches of transitions, the network is trained every N steps using the latest N steps played by the agent.
+- The policy is the neural network. 
+- The prediction step is equal to the Policy Evaluation.
 
-In order to stabilize the learning, multiple workers work together to update the network. This creates the same effect as uncorrelating the samples used for training.
+The current policy is defined by weights in a neural network, by learning the weight it also learns the policy.
 
-Instead of using single-step Q targets for the network, the rewards from $N$ consequent steps are accumulated to form the N
--step Q targets, according to the following equation: 
+- The NN tries to minimize the error by updating the data. The NN has control only over the weights which tunes its output.
+
+### Learning the Q-values
+
+- yt = target at time t
+- y^t = prediction of the NN at time t
+
+The target is the bait used to act. The NN uses the previous version of itself to better predict the output.
+
 ```
-R(st,at)=∑i=t+k−1i=tγi−tri+γkV(st+k)
-```
-Parameters:
-- num_steps_between_copying_online_weights_to_target – (StepMethod) The number of steps between copying the online network weights to the target network weights.
-- apply_gradients_every_x_episodes – (int) The number of episodes between applying the accumulated gradients to the network. After every num_steps_between_gradient_updates steps, the agent will calculate the gradients for the collected data, it will then accumulate it in internal accumulators, and will only apply them to the network once in every apply_gradients_every_x_episodes episodes.
-- num_steps_between_gradient_updates – (int) The number of steps between calculating gradients for the collected data. In the A3C paper, this parameter is called t_max. Since this algorithm is on-policy, only the steps collected between each two gradient calculations are used in the batch.
-- targets_horizon – (str) Should be either ‘N-Step’ or ‘1-Step’, and defines the length for which to bootstrap the network values over. Essentially, 1-Step follows the regular 1 step bootstrapping Q learning update.
-
-### Monte Carlo Algorithm 
-
-Any method that solves a problem by generating suitable random numbers, and observing that fraction of numbers obeying some property or properties, can be classified as a Monte Carlo prediction reinforcement learning method.
-
-The method works by running simulations or episodes where an agent interacts with the environment until it reaches a terminal state. At the end of each episode, the algorithm looks back at the states visited and the rewards received to calculate what’s known as the “return” — the cumulative reward starting from a specific state until the end of the episode. Monte Carlo policy evaluation repeatedly simulates episodes, tracking the total rewards that follow each state and then calculating the average. These averages give an estimate of the state value under the policy being followed.
-
-By aggregating the results over many episodes, the method converges to the true value of each state when following the policy. These values are useful because they help us understand which states are more valuable and thus guide the agent toward better decision-making in the future. Over time, as the agent learns the value of different states, it can refine its policy, favoring actions that lead to higher rewards.
-
-#### Mathematical Concepts in Monte Carlo Policy Evaluation:
-In Monte Carlo policy evaluation, the value V of a state “s” under a policy π is estimated by the average return G following that state. The return is the cumulative reward obtained after visiting state “s”:
-```
-V(s) = \frac{1}{N(s)} \sum_{i=1}^{N(s)} G_i     
+yt = Es'[r + γ max q(s', a'; Ot-1)]
 ```
 
-Here, N(s) is the number of times state “s” is visited across episodes, and Gi is the return from the i-th episode after visiting state “s”. This average converges to the expected return as N(s) becomes large:
-```
-V(s) \approx E_{\pi}[G|S=s]  
-```
+-y^t prediction = output of the NN using the current weights.
 
-Each return Gi is calculated by summing discounted rewards from the time state “s” is visited till the end of the episode:
-```
-G_i = \sum_{k=0}^{\infty} \gamma^k R_{t+k+1}
-```
-γ is the discount factor (between 0 and 1) and R is the reward at each time step. This reflects the idea that rewards in the near future are more valuable than rewards further in the future.
+Updating the weights can be computing the gradient ▼L(Ot) of the L(Ot)
+
+**Use two q-networks:**
+- advantage of putting quality values of s, a
+- the second network will help build training sets for the first one
+- each network has its weights
+- every C step will copy the weight O1
+- they reduce the variance in the output through a smoothing effect
+
+Replay memory is a collection of percepts that the agent has seen. Append percepts to replay memory in Learning Strategy.
+
+### Policy improvement 
+
+If a random number is smaller than ℇ, then explore by sampling a random action from the environment, otherwise give the best prediction.
+
+- Don't render every timestep (maybe every 1000 E).
 
 ## Features
 
-OpenAI Gym: a Pythonic API that provides simulated training environments to train and test reinforcement learning agents
+OpenAI Gym: a Pythonic API that provides simulated training environments to train and test reinforcement learning agents.
 
 ## Installation
 
@@ -148,9 +206,5 @@ Python: used to implement the algorithms.
 ## License 
 Code completed by Alexia Cismaru.
 
-## Sources
-TechTarget: https://www.techtarget.com/searchenterpriseai/definition/Q-learning
-
-GeeksForGeeks: https://www.geeksforgeeks.org/deep-q-learning/, https://www.geeksforgeeks.org/monte-carlo-policy-evaluation/
-
-GitHub: https://intellabs.github.io/coach/components/agents/value_optimization/n_step.html
+# More
+Check the pseudo-code PDF for more info on how to introduce the algorithms in the project.

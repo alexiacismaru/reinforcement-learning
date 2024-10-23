@@ -1,5 +1,7 @@
 # Frozen Lake and Cartpole
 
+**Medium article: https://medium.com/@alexia.csmr/frozen-lake-environment-and-cartpole-2554dd108cc8**
+
 This repository has the solutions to the Frozen Lake and Cartpole reinforcement learning projects.
 
 #### Frozen Lake
